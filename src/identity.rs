@@ -37,36 +37,36 @@ impl FromRequest for Identity {
 impl Identity {
     /// Return the claimed identity of the user associated request or
     /// ``None`` if no identity can be found associated with the request.
-    pub fn identity(&self) -> Option<Claims> {
+    pub fn claims(&self) -> Claims {
         Identity::get_identity(&self.0.extensions())
     }
 
     /// Remember identity.
     pub fn remember(&self, identity: Claims) {
-        if let Some(id) = self.0.extensions_mut().get_mut::<IdentityItem>() {
-            id.id = Some(identity);
-        }
+        // if let Some(id) = self.0.extensions_mut().get_mut::<IdentityItem>() {
+        //     id.id = Some(identity);
+        // }
     }
 
     /// This method is used to 'forget' the current identity on subsequent
     /// requests.
     pub fn forget(&self) {
-        if let Some(id) = self.0.extensions_mut().get_mut::<IdentityItem>() {
-            id.id = None;
-        }
+        // if let Some(id) = self.0.extensions_mut().get_mut::<IdentityItem>() {
+        //     id.id = None;
+        // }
     }
 
-    fn get_identity(extensions: &Ref<'_, Extensions>) -> Option<Claims> {
-        if let Some(id) = extensions.get::<IdentityItem>() {
-            id.id.clone()
-        } else {
-            None
-        }
+    fn get_identity(extensions: &Ref<'_, Extensions>) -> Claims {
+        extensions
+            .get::<IdentityItem>()
+            .expect("identity should be present")
+            .id
+            .clone()
     }
 }
 
 struct IdentityItem {
-    id: Option<Claims>,
+    id: Claims,
 }
 
 #[derive(Clone)]
@@ -178,7 +178,8 @@ where
         }
 
         async move {
-            req.extensions_mut().insert(IdentityItem { id });
+            req.extensions_mut()
+                .insert(IdentityItem { id: id.unwrap() });
 
             let fut = srv.borrow_mut().call(req);
             let res = fut.await?;
@@ -210,4 +211,3 @@ fn validate_auth_(headers: &[Cookie<'static>]) -> Option<Claims> {
         None
     }
 }
-
