@@ -1,0 +1,15 @@
+[package]
+name = "auth"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = { version = "4.5", features = ["openssl"] }
+awc = { version = "3.4", features = ["openssl"] }
+futures = "0.3"
+google-jwt-verify = { git = "https://github.com/moliva/google-jwt-verify", branch = "master", features = [
+  "async",
+] }
+http = "0.2"
+jsonwebtoken = "9.3"
+serde = { version = "1", features = ["derive"] }
